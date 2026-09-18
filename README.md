@@ -1,35 +1,168 @@
-# pdv
-Sistema de ERP web desenvolvido em Java com Spring Framework 
+# PDV — Sistema de ERP web
 
-# Recursos
-- Cadastro produtos/clientes/fornecedor
+Sistema de ERP/ponto de venda desenvolvido em Java com Spring Boot, usado como
+objeto de estudo no trabalho prático da disciplina **Qualidade e Teste**.
+
+Este repositório é um fork do projeto original
+[originmobi/pdv](https://github.com/originmobi/pdv), acrescido dos artefatos de
+teste e qualidade produzidos pelo grupo.
+
+## Equipe
+
+| Integrante | GitHub |
+| --- | --- |
+| Eloyse Fernanda | [@elojas2](https://github.com/elojas2) |
+| Natalia de Abreu Lamas | — |
+| Alexandre Porto | — |
+
+As responsabilidades de cada integrante e as classes sob teste estão em
+[`docs/README.md`](docs/README.md).
+
+## Sumário
+
+- [Equipe](#equipe)
+- [Artefatos do trabalho](#artefatos-do-trabalho)
+- [Recursos do sistema](#recursos-do-sistema)
+- [Tecnologias](#tecnologias)
+- [Executando com Docker (recomendado)](#executando-com-docker-recomendado)
+- [Executando localmente](#executando-localmente)
+- [Acesso ao sistema](#acesso-ao-sistema)
+- [Testes e métricas](#testes-e-métricas)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Licença](#licença)
+
+## Artefatos do trabalho
+
+Todos os artefatos estão na branch principal (`master`), sob o diretório
+[`docs/`](docs/). O índice completo, com os links dos documentos editáveis no
+Google Docs, está em **[`docs/README.md`](docs/README.md)**.
+
+| Artefato | Local |
+| --- | --- |
+| Índice geral da documentação | [`docs/README.md`](docs/README.md) |
+| Plano de Teste | [`docs/plano-de-teste.md`](docs/plano-de-teste.md) |
+| Relatórios (cobertura, mutação, inspeção) | [`docs/relatorios/`](docs/relatorios/) |
+| Evidências de execução | [`docs/evidencias/`](docs/evidencias/) |
+| **Registro de uso de IA** | [`docs/ai/AI-LOG.md`](docs/ai/AI-LOG.md) |
+| Slides das apresentações | [`docs/apresentacoes/`](docs/apresentacoes/) |
+| Código dos testes automatizados | [`src/test/java/`](src/test/java/) |
+| Defeitos reportados | [Issues do repositório](https://github.com/elojas2/trabalho-pdv-2026.1/issues) |
+
+## Recursos do sistema
+
+- Cadastro de produtos, clientes e fornecedores
 - Controle de estoque
-- Gerenciar comandas
-- Realizar venda
+- Gerenciamento de comandas
+- Realização de vendas, inclusive com cartões
 - Controle de fluxo de caixa
-- Controle de pagar e receber
-- Venda com cartões
-- Gerenciar permissões de usuários por grupos
-- Cadastrar novas formas de pagamentos
+- Contas a pagar e a receber
+- Permissões de usuários por grupo
+- Cadastro de formas de pagamento
 - Relatórios
 
-# Instalação
-Para instalar o sistema, você deve criar o banco de dado "pdv" no mysql e configurar o arquivo application.properties
-com os dados do seu usuário root do mysql e rodar o projeto pelo Eclipse ou gerar o jar do mesmo e execultar.
+## Tecnologias
 
-# Logando no sistema
-Para logar no sistema, use o usuário "gerente" e a senha "123".
+| | |
+| --- | --- |
+| Linguagem | Java 8 |
+| Framework | Spring Boot / Spring Framework 5, Spring Security |
+| View | Thymeleaf 3 |
+| Persistência | Hibernate (JPA), Flyway para migrações |
+| Banco | MySQL 8 |
+| Relatórios | JasperReports |
+| Build | Maven (wrapper incluído) |
+| Testes | JUnit, Spring Boot Test, JaCoCo |
 
-# Tecnologias utilizadas
-- Spring Framework 5
-- Thymeleaf 3
-- MySQL
-- Hibernate
-- FlyWay
+## Executando com Docker (recomendado)
 
-# Execução com Docker
-Para executar a aplicação utilizando o docker, utilize o seguinte comando na raiz do projeto:
+Requer Docker com Compose v2. Na raiz do projeto:
+
 ```sh
 docker compose up -d
 ```
 
+O Compose sobe dois serviços:
+
+| Serviço | Portas | Descrição |
+| --- | --- | --- |
+| `pdv-app` | `8080` (app), `5005` (debug JDWP) | build Maven e execução do `.war` |
+| `pdv-db` | `3306` | MySQL 8 com o banco `pdv` já criado |
+
+O primeiro start baixa as dependências Maven e pode levar alguns minutos.
+Acompanhe com:
+
+```sh
+docker compose logs -f pdv-app
+```
+
+A aplicação fica em <http://localhost:8080>. Para parar:
+
+```sh
+docker compose down          # mantém os dados
+docker compose down -v       # remove também os volumes
+```
+
+A porta `5005` está aberta para debug remoto (JDWP), permitindo conectar a IDE
+ao container.
+
+## Executando localmente
+
+1. Instale o JDK 8 e o MySQL 8.
+2. Crie o banco e o usuário. O script está em [`README.txt`](README.txt):
+   ```sql
+   CREATE DATABASE pdv;
+   CREATE USER 'pdv' IDENTIFIED BY 'kate456';
+   GRANT CREATE, DELETE, INSERT, SELECT, UPDATE, REFERENCES, TRIGGER ON pdv.* TO pdv;
+   FLUSH PRIVILEGES;
+   ```
+3. Ajuste as credenciais em `src/main/resources/application.properties`.
+4. Suba a aplicação:
+   ```sh
+   ./mvnw spring-boot:run
+   ```
+   ou gere e execute o pacote:
+   ```sh
+   ./mvnw clean package
+   java -jar target/pdv-0.0.1-SNAPSHOT.war
+   ```
+
+As migrações do Flyway são aplicadas automaticamente na subida.
+
+## Acesso ao sistema
+
+| Usuário | Senha |
+| --- | --- |
+| `gerente` | `123` |
+
+> Credenciais padrão do projeto original, adequadas apenas para uso local.
+
+## Testes e métricas
+
+```sh
+./mvnw test                  # executa a suíte de testes
+./mvnw clean test            # testes + relatório de cobertura JaCoCo
+```
+
+O relatório de cobertura é gerado em `target/site/jacoco/index.html`.
+
+Dentro do container:
+
+```sh
+docker compose exec pdv-app mvn test
+```
+
+## Estrutura do projeto
+
+```
+├── docs/                  # artefatos do trabalho (ver docs/README.md)
+├── src/main/java/         # código-fonte da aplicação
+├── src/main/resources/    # templates, estáticos e migrações Flyway
+├── src/test/java/         # testes automatizados
+├── docker-compose.yml     # app + MySQL
+├── Dockerfile             # imagem de build/execução
+└── pom.xml                # dependências e plugins Maven
+```
+
+## Licença
+
+Distribuído sob a licença Apache 2.0 — ver [`LICENSE`](LICENSE).
