@@ -32,7 +32,7 @@ versões.
 
 | Entrega | Peso | Prazo | Status |
 | --- | --- | --- | --- |
-| Entrega 1 | 3 | 24/09/2026 | em andamento |
+| Entrega 1 | 3 | 23/09/2026 | em andamento |
 | Entrega 2 | 5 | _a definir_ | não iniciada |
 
 ## Equipe e responsabilidades
