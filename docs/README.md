@@ -23,7 +23,7 @@ versões.
 
 | Documento | Link |
 | --- | --- |
-| Plano de Teste | _adicionar link_ |
+| Plano de Teste | [Link do google docs](https://docs.google.com/document/d/1b40d0Y7q8RmNOTqsJ-dV7mlSIBAJlqY2Q8F_PGl12M0/edit?usp=sharing) |
 | Casos de teste manuais | _adicionar link_ |
 | Relatório de inspeção de código | _adicionar link_ |
 | Medidas ISO/IEC 25010 | _adicionar link_ |
@@ -32,8 +32,8 @@ versões.
 
 | Entrega | Peso | Prazo | Status |
 | --- | --- | --- | --- |
-| Entrega 1 | 3 | 06/10/2025 | em andamento |
-| Entrega 2 | 5 | 07/07/2025 (conforme enunciado) | não iniciada |
+| Entrega 1 | 3 | 24/09/2026 | em andamento |
+| Entrega 2 | 5 | _a definir_ | não iniciada |
 
 ## Equipe e responsabilidades
 
