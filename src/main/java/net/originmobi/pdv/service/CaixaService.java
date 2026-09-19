@@ -160,7 +160,7 @@ public class CaixaService {
 				return caixas.buscaCaixasPorDataAbertura(Date.valueOf(filter.getData_cadastro()));
 			}
 		}
-		
+
 		return caixas.listaCaixasAbertos();
 	}
 
