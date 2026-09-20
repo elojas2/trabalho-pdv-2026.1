@@ -1,15 +1,21 @@
 package net.originmobi.pdv;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Date;
@@ -19,18 +25,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import net.originmobi.pdv.enumerado.caixa.CaixaTipo;
@@ -45,14 +49,16 @@ import net.originmobi.pdv.repository.CaixaRepository;
 import net.originmobi.pdv.service.CaixaLancamentoService;
 import net.originmobi.pdv.service.CaixaService;
 import net.originmobi.pdv.service.UsuarioService;
+import net.originmobi.pdv.singleton.Aplicacao;
 
 /**
  * Testes unitários de {@link CaixaService}.
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
-public class CaixaServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CaixaServiceTest {
 
 	private static final String USUARIO_LOGADO = "gerente";
+	private static final String SENHA_CORRETA = "123";
 
 	@Mock
 	private CaixaRepository caixas;
@@ -72,23 +78,46 @@ public class CaixaServiceTest {
 	@Captor
 	private ArgumentCaptor<CaixaLancamento> lancamentoCaptor;
 
-	@Rule
-	public ExpectedException excecaoEsperada = ExpectedException.none();
-
 	private Usuario usuario;
 
-	@Before
-	public void setUp() {
-		// Aplicacao (singleton) lê o usuário autenticado do SecurityContextHolder
-		SecurityContextHolder.getContext()
-				.setAuthentication(new UsernamePasswordAuthenticationToken(USUARIO_LOGADO, "123"));
+	private MockedStatic<Aplicacao> aplicacaoEstatica;
 
+	@AfterEach
+	void fechaMockEstatico() {
+		if (aplicacaoEstatica != null)
+			aplicacaoEstatica.close();
+	}
+
+	/**
+	 * Stub do usuário devolvido pelo UsuarioService.
+	 *
+	 * Fica aqui, e não num {@code @BeforeEach}, porque só os fluxos que passam
+	 * pelo UsuarioService precisam dele — nos demais o modo estrito do Mockito
+	 * reprovaria o stub não utilizado.
+	 */
+	private void dadoUsuarioCadastrado() {
 		usuario = new Usuario();
 		usuario.setCodigo(1L);
 		usuario.setUser(USUARIO_LOGADO);
-		usuario.setSenha(new BCryptPasswordEncoder().encode("123"));
+		usuario.setSenha(new BCryptPasswordEncoder().encode(SENHA_CORRETA));
 
 		when(usuarios.buscaUsuario(anyString())).thenReturn(usuario);
+	}
+
+	/**
+	 * Arranjo dos fluxos que descobrem o usuário logado pelo singleton
+	 * {@link Aplicacao}. O singleton guarda o usuário na primeira chamada e
+	 * nunca mais o relê, então o mock estático é o que garante que cada teste
+	 * enxergue o usuário que ele mesmo definiu.
+	 */
+	private void dadoUsuarioAutenticado() {
+		dadoUsuarioCadastrado();
+
+		Aplicacao aplicacao = mock(Aplicacao.class);
+		when(aplicacao.getUsuarioAtual()).thenReturn(USUARIO_LOGADO);
+
+		aplicacaoEstatica = mockStatic(Aplicacao.class);
+		aplicacaoEstatica.when(Aplicacao::getInstancia).thenReturn(aplicacao);
 	}
 
 	private Caixa novoCaixa(CaixaTipo tipo, String descricao, Double valorAbertura) {
@@ -102,36 +131,45 @@ public class CaixaServiceTest {
 	// ------------------------------------------------------------------
 	// cadastro
 	// ------------------------------------------------------------------
-
 	@Test
-	public void cadastro_caixaSemAberturaAnterior_deveSalvarERetornarCodigo() {
+	@DisplayName("sem caixa aberto anteriormente deve salvar e retornar o código gerado")
+	void cadastro_caixaSemAberturaAnterior_deveSalvarERetornarCodigo() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
-		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa da loja", 150.0);
 		when(caixas.save(any(Caixa.class))).thenAnswer(invocacao -> {
 			((Caixa) invocacao.getArgument(0)).setCodigo(10L);
 			return invocacao.getArgument(0);
 		});
+		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa da loja", 150.0);
 
 		Long codigo = service.cadastro(caixa);
 
 		assertEquals(Long.valueOf(10L), codigo);
 		verify(caixas).save(caixaCaptor.capture());
-		assertEquals("Caixa da loja", caixaCaptor.getValue().getDescricao());
-		assertEquals(usuario, caixaCaptor.getValue().getUsuario());
+		Caixa salvo = caixaCaptor.getValue();
+		assertEquals("Caixa da loja", salvo.getDescricao());
+		assertSame(usuario, salvo.getUsuario());
+		assertNotNull(salvo.getData_cadastro(), "a data de cadastro deve ser preenchida");
+		assertNull(salvo.getData_fechamento(), "um caixa recém aberto não possui fechamento");
 	}
 
 	@Test
-	public void cadastro_caixaComOutroAberto_deveLancarExcecao() {
+	@DisplayName("com outro caixa em aberto deve lançar exceção e não salvar")
+	void cadastro_caixaComOutroAberto_deveLancarExcecao() {
 		when(caixas.caixaAberto()).thenReturn(Optional.of(new Caixa()));
+		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa diário", 0.0);
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Existe caixa de dias anteriores em aberto, favor verifique");
+		RuntimeException erro = assertThrows(RuntimeException.class, () -> service.cadastro(caixa));
 
-		service.cadastro(novoCaixa(CaixaTipo.CAIXA, "Caixa diário", 0.0));
+		assertEquals("Existe caixa de dias anteriores em aberto, favor verifique", erro.getMessage());
+		verify(caixas, never()).save(any(Caixa.class));
+		verifyNoInteractions(usuarios, lancamentos);
 	}
 
 	@Test
-	public void cadastro_valorAberturaNulo_deveAssumirZeroENaoLancar() {
+	@DisplayName("valor de abertura nulo deve assumir zero e não gerar lançamento")
+	void cadastro_valorAberturaNulo_deveAssumirZeroENaoLancar() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", null);
 
@@ -139,21 +177,27 @@ public class CaixaServiceTest {
 
 		assertEquals(Double.valueOf(0.0), caixa.getValor_abertura());
 		assertEquals(Double.valueOf(0.0), caixa.getValor_total());
+		verify(caixas).save(caixa);
 		verify(lancamentos, never()).lancamento(any(CaixaLancamento.class));
 	}
 
 	@Test
-	public void cadastro_valorAberturaNegativo_deveLancarExcecao() {
+	@DisplayName("valor de abertura negativo deve lançar exceção antes de qualquer persistência")
+	void cadastro_valorAberturaNegativo_deveLancarExcecao() {
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
+		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", -1.0);
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Valor informado é inválido");
+		RuntimeException erro = assertThrows(RuntimeException.class, () -> service.cadastro(caixa));
 
-		service.cadastro(novoCaixa(CaixaTipo.CAIXA, "Caixa", -1.0));
+		assertEquals("Valor informado é inválido", erro.getMessage());
+		verify(caixas, never()).save(any(Caixa.class));
+		verifyNoInteractions(usuarios, lancamentos);
 	}
 
 	@Test
-	public void cadastro_descricaoVaziaPorTipo_deveAplicarDescricaoPadrao() {
+	@DisplayName("descrição vazia deve receber a descrição padrão de cada tipo")
+	void cadastro_descricaoVaziaPorTipo_deveAplicarDescricaoPadrao() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
 
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "", 0.0);
@@ -169,10 +213,14 @@ public class CaixaServiceTest {
 		banco.setConta("56.789-0");
 		service.cadastro(banco);
 		assertEquals("Banco", banco.getDescricao());
+
+		verify(caixas, times(3)).save(any(Caixa.class));
 	}
 
 	@Test
-	public void cadastro_tipoBanco_deveRemoverCaracteresNaoNumericosDeAgenciaEConta() {
+	@DisplayName("tipo BANCO deve remover caracteres não numéricos de agência e conta")
+	void cadastro_tipoBanco_deveRemoverCaracteresNaoNumericosDeAgenciaEConta() {
+		dadoUsuarioAutenticado();
 		Caixa banco = novoCaixa(CaixaTipo.BANCO, "Banco do Brasil", 0.0);
 		banco.setAgencia("12-34");
 		banco.setConta("56.789-0");
@@ -181,10 +229,16 @@ public class CaixaServiceTest {
 
 		assertEquals("1234", banco.getAgencia());
 		assertEquals("567890", banco.getConta());
+		assertEquals("Banco do Brasil", banco.getDescricao());
+		// para tipo BANCO não há validação de caixa aberto
+		verify(caixas, never()).caixaAberto();
+		verify(caixas).save(banco);
 	}
 
 	@Test
-	public void cadastro_comValorAbertura_deveGerarLancamentoDeSaldoInicial() {
+	@DisplayName("com valor de abertura deve gerar o lançamento de saldo inicial")
+	void cadastro_comValorAbertura_deveGerarLancamentoDeSaldoInicial() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 200.0);
 
@@ -196,214 +250,278 @@ public class CaixaServiceTest {
 		assertEquals(Double.valueOf(200.0), lancamento.getValor());
 		assertEquals(TipoLancamento.SALDOINICIAL, lancamento.getTipo());
 		assertEquals(EstiloLancamento.ENTRADA, lancamento.getEstilo());
+		assertTrue(lancamento.getCaixa().isPresent());
+		assertSame(caixa, lancamento.getCaixa().get());
+		assertSame(usuario, lancamento.getUsuario());
+		assertNull(caixa.getValor_total(), "o valor total é calculado pelo lançamento, não pelo cadastro");
 	}
 
 	@Test
-	public void cadastro_erroAoSalvar_deveLancarExcecaoDeSuporte() {
+	@DisplayName("tipo COFRE com valor de abertura deve descrever o lançamento como abertura de cofre")
+	void cadastro_cofreComValorAbertura_deveDescreverAberturaDeCofre() {
+		dadoUsuarioAutenticado();
+		Caixa cofre = novoCaixa(CaixaTipo.COFRE, "Cofre central", 80.0);
+
+		service.cadastro(cofre);
+
+		verify(lancamentos).lancamento(lancamentoCaptor.capture());
+		assertEquals("Abertura de cofre", lancamentoCaptor.getValue().getObservacao());
+		assertEquals(Double.valueOf(80.0), lancamentoCaptor.getValue().getValor());
+	}
+
+	@Test
+	@DisplayName("erro ao salvar deve virar exceção de suporte e não gerar lançamento")
+	void cadastro_erroAoSalvar_deveLancarExcecaoDeSuporte() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
 		when(caixas.save(any(Caixa.class))).thenThrow(new RuntimeException("falha no banco"));
+		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0);
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Erro no processo de abertura, chame o suporte técnico");
+		RuntimeException erro = assertThrows(RuntimeException.class, () -> service.cadastro(caixa));
 
-		service.cadastro(novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0));
+		assertEquals("Erro no processo de abertura, chame o suporte técnico", erro.getMessage());
+		verify(lancamentos, never()).lancamento(any(CaixaLancamento.class));
 	}
 
 	@Test
-	public void cadastro_erroNoLancamento_deveLancarExcecaoDeSuporte() {
+	@DisplayName("erro no lançamento deve virar exceção de suporte")
+	void cadastro_erroNoLancamento_deveLancarExcecaoDeSuporte() {
+		dadoUsuarioAutenticado();
 		when(caixas.caixaAberto()).thenReturn(Optional.empty());
 		when(lancamentos.lancamento(any(CaixaLancamento.class))).thenThrow(new RuntimeException("falha"));
+		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 50.0);
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Erro no processo, chame o suporte");
+		RuntimeException erro = assertThrows(RuntimeException.class, () -> service.cadastro(caixa));
 
-		service.cadastro(novoCaixa(CaixaTipo.CAIXA, "Caixa", 50.0));
+		assertEquals("Erro no processo, chame o suporte", erro.getMessage());
+		verify(caixas).save(caixa);
 	}
 
 	// ------------------------------------------------------------------
 	// fechaCaixa
 	// ------------------------------------------------------------------
-
 	@Test
-	public void fechaCaixa_senhaVazia_deveRetornarMensagem() {
+	@DisplayName("senha vazia deve retornar mensagem e não tocar no caixa")
+	void fechaCaixa_senhaVazia_deveRetornarMensagem() {
+		dadoUsuarioAutenticado();
+
 		assertEquals("Favor, informe a senha", service.fechaCaixa(1L, ""));
+
+		verify(caixas, never()).findById(anyLong());
 		verify(caixas, never()).save(any(Caixa.class));
 	}
 
 	@Test
-	public void fechaCaixa_senhaIncorreta_deveRetornarMensagem() {
+	@DisplayName("senha incorreta deve retornar mensagem e não fechar o caixa")
+	void fechaCaixa_senhaIncorreta_deveRetornarMensagem() {
+		dadoUsuarioAutenticado();
+
 		assertEquals("Senha incorreta, favor verifique", service.fechaCaixa(1L, "senhaErrada"));
+
+		verify(caixas, never()).findById(anyLong());
 		verify(caixas, never()).save(any(Caixa.class));
 	}
 
 	@Test
-	public void fechaCaixa_senhaCorreta_deveFecharEGravarValores() {
+	@DisplayName("senha correta deve fechar o caixa gravando data e valor de fechamento")
+	void fechaCaixa_senhaCorreta_deveFecharEGravarValores() {
+		dadoUsuarioAutenticado();
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0);
 		caixa.setValor_total(320.0);
 		when(caixas.findById(1L)).thenReturn(Optional.of(caixa));
 
-		String retorno = service.fechaCaixa(1L, "123");
+		String retorno = service.fechaCaixa(1L, SENHA_CORRETA);
 
 		assertEquals("Caixa fechado com sucesso", retorno);
 		verify(caixas).save(caixa);
 		assertEquals(Double.valueOf(320.0), caixa.getValor_fechamento());
-		assertTrue(caixa.getData_fechamento() != null);
+		assertNotNull(caixa.getData_fechamento(), "a data de fechamento deve ser preenchida");
 	}
 
 	@Test
-	public void fechaCaixa_semValorTotal_deveFecharComZero() {
+	@DisplayName("caixa sem valor total deve ser fechado com zero")
+	void fechaCaixa_semValorTotal_deveFecharComZero() {
+		dadoUsuarioAutenticado();
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0);
 		caixa.setValor_total(null);
 		when(caixas.findById(1L)).thenReturn(Optional.of(caixa));
 
-		service.fechaCaixa(1L, "123");
+		assertEquals("Caixa fechado com sucesso", service.fechaCaixa(1L, SENHA_CORRETA));
 
 		assertEquals(Double.valueOf(0.0), caixa.getValor_fechamento());
+		verify(caixas).save(caixa);
 	}
 
 	@Test
-	public void fechaCaixa_caixaJaFechado_deveLancarExcecao() {
+	@DisplayName("caixa já fechado deve lançar exceção")
+	void fechaCaixa_caixaJaFechado_deveLancarExcecao() {
+		dadoUsuarioAutenticado();
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0);
-		caixa.setData_fechamento(new Timestamp(System.currentTimeMillis()));
+		Timestamp fechamentoOriginal = new Timestamp(System.currentTimeMillis());
+		caixa.setData_fechamento(fechamentoOriginal);
 		when(caixas.findById(1L)).thenReturn(Optional.of(caixa));
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Caixa já esta fechado");
+		RuntimeException erro = assertThrows(RuntimeException.class,
+				() -> service.fechaCaixa(1L, SENHA_CORRETA));
 
-		service.fechaCaixa(1L, "123");
+		assertEquals("Caixa já esta fechado", erro.getMessage());
+		assertEquals(fechamentoOriginal, caixa.getData_fechamento());
+		verify(caixas, never()).save(any(Caixa.class));
 	}
 
 	@Test
-	public void fechaCaixa_erroAoSalvar_deveLancarExcecaoDeSuporte() {
+	@DisplayName("erro ao salvar deve virar exceção de suporte")
+	void fechaCaixa_erroAoSalvar_deveLancarExcecaoDeSuporte() {
+		dadoUsuarioAutenticado();
 		Caixa caixa = novoCaixa(CaixaTipo.CAIXA, "Caixa", 0.0);
 		caixa.setValor_total(10.0);
 		when(caixas.findById(1L)).thenReturn(Optional.of(caixa));
 		when(caixas.save(any(Caixa.class))).thenThrow(new RuntimeException("falha"));
 
-		excecaoEsperada.expect(RuntimeException.class);
-		excecaoEsperada.expectMessage("Ocorreu um erro ao fechar o caixa, chame o suporte");
+		RuntimeException erro = assertThrows(RuntimeException.class,
+				() -> service.fechaCaixa(1L, SENHA_CORRETA));
 
-		service.fechaCaixa(1L, "123");
+		assertEquals("Ocorreu um erro ao fechar o caixa, chame o suporte", erro.getMessage());
 	}
 
 	// ------------------------------------------------------------------
 	// consultas
 	// ------------------------------------------------------------------
-
 	@Test
-	public void caixaIsAberto_deveRefletirRetornoDoRepositorio() {
-		when(caixas.caixaAberto()).thenReturn(Optional.of(new Caixa()));
-		assertTrue(service.caixaIsAberto());
+	@DisplayName("caixaIsAberto deve refletir o retorno do repositório")
+	void caixaIsAberto_deveRefletirRetornoDoRepositorio() {
+		when(caixas.caixaAberto()).thenReturn(Optional.of(new Caixa()), Optional.empty());
 
-		when(caixas.caixaAberto()).thenReturn(Optional.empty());
+		assertTrue(service.caixaIsAberto());
 		assertFalse(service.caixaIsAberto());
+		verify(caixas, times(2)).caixaAberto();
 	}
 
 	@Test
-	public void listaTodos_deveDelegarParaRepositorio() {
+	@DisplayName("listaTodos deve delegar para o repositório")
+	void listaTodos_deveDelegarParaRepositorio() {
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.findByCodigoOrdenado()).thenReturn(esperado);
 
-		assertEquals(esperado, service.listaTodos());
+		assertSame(esperado, service.listaTodos());
 	}
 
 	@Test
-	public void listarCaixas_comDataInformada_deveBuscarPorDataAbertura() {
+	@DisplayName("listarCaixas com data deve buscar por data de abertura")
+	void listarCaixas_comDataInformada_deveBuscarPorDataAbertura() {
 		CaixaFilter filter = new CaixaFilter();
 		filter.setData_cadastro("2026/09/19");
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.buscaCaixasPorDataAbertura(Date.valueOf("2026-09-19"))).thenReturn(esperado);
 
-		assertEquals(esperado, service.listarCaixas(filter));
+		assertSame(esperado, service.listarCaixas(filter));
+		assertEquals("2026-09-19", filter.getData_cadastro(), "a barra deve ser normalizada para hífen");
 		verify(caixas, never()).listaCaixasAbertos();
 	}
 
 	@Test
-	public void listarCaixas_semData_deveListarAbertos() {
+	@DisplayName("listarCaixas sem data (nula ou vazia) deve listar os abertos")
+	void listarCaixas_semData_deveListarAbertos() {
 		List<Caixa> esperado = Arrays.asList(new Caixa(), new Caixa());
 		when(caixas.listaCaixasAbertos()).thenReturn(esperado);
 
-		assertEquals(esperado, service.listarCaixas(new CaixaFilter()));
+		assertSame(esperado, service.listarCaixas(new CaixaFilter()));
 
 		CaixaFilter filtroVazio = new CaixaFilter();
 		filtroVazio.setData_cadastro("");
-		assertEquals(esperado, service.listarCaixas(filtroVazio));
+		assertSame(esperado, service.listarCaixas(filtroVazio));
 		verify(caixas, times(2)).listaCaixasAbertos();
+		verify(caixas, never()).buscaCaixasPorDataAbertura(any(Date.class));
 	}
 
 	@Test
-	public void caixaAberto_deveDelegarParaRepositorio() {
+	@DisplayName("caixaAberto deve delegar para o repositório")
+	void caixaAberto_deveDelegarParaRepositorio() {
 		Optional<Caixa> esperado = Optional.of(new Caixa());
 		when(caixas.caixaAberto()).thenReturn(esperado);
 
-		assertEquals(esperado, service.caixaAberto());
+		assertSame(esperado, service.caixaAberto());
 	}
 
 	@Test
-	public void caixasAbertos_deveDelegarParaRepositorio() {
+	@DisplayName("caixasAbertos deve delegar para o repositório")
+	void caixasAbertos_deveDelegarParaRepositorio() {
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.caixasAbertos()).thenReturn(esperado);
 
-		assertEquals(esperado, service.caixasAbertos());
+		assertSame(esperado, service.caixasAbertos());
 	}
 
 	@Test
-	public void busca_deveDelegarParaRepositorio() {
+	@DisplayName("busca deve delegar para o repositório")
+	void busca_deveDelegarParaRepositorio() {
 		Optional<Caixa> esperado = Optional.of(new Caixa());
 		when(caixas.findById(5L)).thenReturn(esperado);
 
-		assertEquals(esperado, service.busca(5L));
+		assertSame(esperado, service.busca(5L));
 	}
 
 	@Test
-	public void buscaCaixaUsuario_comCaixaAberto_deveRetornarOptionalPreenchido() {
+	@DisplayName("buscaCaixaUsuario com caixa aberto deve retornar Optional preenchido")
+	void buscaCaixaUsuario_comCaixaAberto_deveRetornarOptionalPreenchido() {
+		dadoUsuarioCadastrado();
 		Caixa caixa = new Caixa();
 		when(caixas.findByCaixaAbertoUsuario(1L)).thenReturn(caixa);
 
 		Optional<Caixa> retorno = service.buscaCaixaUsuario(USUARIO_LOGADO);
 
 		assertTrue(retorno.isPresent());
-		assertEquals(caixa, retorno.get());
+		assertSame(caixa, retorno.get());
+		verify(usuarios).buscaUsuario(USUARIO_LOGADO);
 	}
 
 	@Test
-	public void buscaCaixaUsuario_semCaixaAberto_deveRetornarOptionalVazio() {
+	@DisplayName("buscaCaixaUsuario sem caixa aberto deve retornar Optional vazio")
+	void buscaCaixaUsuario_semCaixaAberto_deveRetornarOptionalVazio() {
+		dadoUsuarioCadastrado();
 		when(caixas.findByCaixaAbertoUsuario(anyLong())).thenReturn(null);
 
 		assertFalse(service.buscaCaixaUsuario(USUARIO_LOGADO).isPresent());
 	}
 
 	@Test
-	public void listaBancos_deveBuscarPorTipoBanco() {
+	@DisplayName("listaBancos deve buscar pelo tipo BANCO")
+	void listaBancos_deveBuscarPorTipoBanco() {
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.buscaBancos(CaixaTipo.BANCO)).thenReturn(esperado);
 
-		assertEquals(esperado, service.listaBancos());
+		assertSame(esperado, service.listaBancos());
 	}
 
 	@Test
-	public void listaCaixasAbertosTipo_deveBuscarPorTipoInformado() {
+	@DisplayName("listaCaixasAbertosTipo deve buscar pelo tipo informado")
+	void listaCaixasAbertosTipo_deveBuscarPorTipoInformado() {
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.buscaCaixaTipo(CaixaTipo.COFRE)).thenReturn(esperado);
 
-		assertEquals(esperado, service.listaCaixasAbertosTipo(CaixaTipo.COFRE));
+		assertSame(esperado, service.listaCaixasAbertosTipo(CaixaTipo.COFRE));
 	}
 
 	@Test
-	public void listaBancosAbertosTipoFilterBanco_comData_deveBuscarPorTipoEData() {
+	@DisplayName("listaBancosAbertosTipoFilterBanco com data deve buscar por tipo e data")
+	void listaBancosAbertosTipoFilterBanco_comData_deveBuscarPorTipoEData() {
 		BancoFilter filter = new BancoFilter();
 		filter.setData_cadastro("2026/09/19");
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
-		when(caixas.buscaCaixaTipoData(eq(CaixaTipo.BANCO), eq(Date.valueOf("2026-09-19")))).thenReturn(esperado);
+		when(caixas.buscaCaixaTipoData(CaixaTipo.BANCO, Date.valueOf("2026-09-19"))).thenReturn(esperado);
 
-		assertEquals(esperado, service.listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, filter));
+		assertSame(esperado, service.listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, filter));
+		assertEquals("2026-09-19", filter.getData_cadastro());
+		verify(caixas, never()).buscaCaixaTipo(any(CaixaTipo.class));
 	}
 
 	@Test
-	public void listaBancosAbertosTipoFilterBanco_semData_deveBuscarTodosOsBancos() {
+	@DisplayName("listaBancosAbertosTipoFilterBanco sem data deve buscar todos os bancos")
+	void listaBancosAbertosTipoFilterBanco_semData_deveBuscarTodosOsBancos() {
 		List<Caixa> esperado = Collections.singletonList(new Caixa());
 		when(caixas.buscaCaixaTipo(CaixaTipo.BANCO)).thenReturn(esperado);
 
-		assertEquals(esperado, service.listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, new BancoFilter()));
+		assertSame(esperado, service.listaBancosAbertosTipoFilterBanco(CaixaTipo.BANCO, new BancoFilter()));
+		verify(caixas, never()).buscaCaixaTipoData(any(CaixaTipo.class), any(Date.class));
 	}
 }
