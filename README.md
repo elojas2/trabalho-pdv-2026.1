@@ -44,6 +44,8 @@ Google Docs, está em **[`docs/README.md`](docs/README.md)**.
 | Relatórios (cobertura, mutação, inspeção) | [`docs/relatorios/`](docs/relatorios/) |
 | Evidências de execução | [`docs/evidencias/`](docs/evidencias/) |
 | **Registro de uso de IA** | [`docs/ai/AI-LOG.md`](docs/ai/AI-LOG.md) |
+| Testes gerados por IA — solução inicial (v0) | [`docs/ai/transcricoes/AI-002-v0-CaixaServiceTest.java`](docs/ai/transcricoes/AI-002-v0-CaixaServiceTest.java) |
+| Testes gerados por IA — descrição das alterações da revisão | [`docs/ai/transcricoes/AI-003-alteracoes-v0-para-final.md`](docs/ai/transcricoes/AI-003-alteracoes-v0-para-final.md) |
 | Slides das apresentações | [`docs/apresentacoes/`](docs/apresentacoes/) |
 | Código dos testes automatizados | [`src/test/java/`](src/test/java/) |
 | Defeitos reportados | [Issues do repositório](https://github.com/elojas2/trabalho-pdv-2026.1/issues) |
