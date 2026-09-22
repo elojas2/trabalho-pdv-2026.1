@@ -85,7 +85,23 @@ Para testes gerados ou melhorados com auxílio de IA, preserve também:
 
 ---
 
-## AI-004 — _título da próxima interação_
+## AI-004 — Seleção da classe sob teste e planejamento dos casos de teste unitários de `VendaService`
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 1 — seleção da classe sob teste do módulo Venda e planejamento dos casos de teste unitários, dos testes manuais e das modificações no Plano de Teste |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local) |
+| **Prompt/instrução** | "Leia o arquivo Trabalho - Qualidade e Teste.pdf e guarde em seu contexto, ele é a fonte da verdade sobre tudo que precisará ser feito. [...] Faça um planejamento para realizar a minha parte do trabalho (Alexandre). Só deve ser considerado a entrega 1 no momento. Procure uma classe para criar os casos de testes que seja diferente do caso feito pela Eloyse. Ela fez o CaixaServiceTest. Me explique pq essa classe escolhida atende todos os requisitos apresentados no documento para ela ser escolhida. Vale ressaltar que ela deve ter uma complexidade ciclomática de pelo menos 10. Inclua no plano todas as modificações que precisam ser feitas no docs/plano-de-teste.md." |
+| **Resultado** | A IA leu o enunciado (PDF indexado via knowledge base), todos os services do projeto (`VendaService`, `RecebimentoService`, `PagarService`, `CartaoLancamentoService`, `ProdutoService`, `AjusteService`), a estrutura de testes existente e o `plano-de-teste.md`. Produziu: (a) justificativa detalhada da escolha de `VendaService` como classe sob teste (não é CRUD, complexidade ciclomática estimada ≥ 20 com ~32 pontos de decisão, domínio diferente de `CaixaService`); (b) plano de 10 tasks cobrindo implementação dos testes unitários (≥ 18 casos sobre todos os métodos públicos), testes manuais do módulo Venda, atualizações no `plano-de-teste.md` e no `docs/README.md`, e registro no AI-LOG. |
+| **Decisão** | **Aceito:** a escolha de `VendaService` como classe sob teste; a estrutura do plano em 10 tasks; os casos de teste propostos para cada método. **A definir pelo Alexandre:** aprovação ou ajuste do plano antes de iniciar a implementação; escolha de quais casos de teste manuais executar primeiro. **Deixado em aberto:** campos "Decisão" e "Validação" desta entrada, a serem preenchidos após execução. |
+| **Validação** | A ser preenchido após execução das tasks e confirmação de que a suíte passa. |
+| **Transcrição** | Não preservada |
+
+---
+
+## AI-005 — _título da próxima interação_
 
 | Campo | Conteúdo |
 | --- | --- |
