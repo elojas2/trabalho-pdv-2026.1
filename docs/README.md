@@ -10,7 +10,6 @@ referenciado não é avaliado.
 | --- | --- |
 | [`plano-de-teste.md`](plano-de-teste.md) | Plano de Teste: escopo, estratégia, ferramentas, critérios de entrada/saída |
 | [`relatorios/`](relatorios/) | Relatórios de cobertura (JaCoCo), mutação (PIT) e inspeção estática (SonarQube) |
-| [`evidencias/`](evidencias/) | Prints e evidências de execução (testes, ferramentas, bugs) |
 | [`ai/AI-LOG.md`](ai/AI-LOG.md) | Registro obrigatório do uso de Inteligência Artificial |
 | [`ai/transcricoes/`](ai/transcricoes/) | Conversas, prompts e configurações completas de ferramentas de IA |
 | [`apresentacoes/`](apresentacoes/) | Slides das apresentações parcial e final |
@@ -24,7 +23,7 @@ versões.
 | Documento | Link |
 | --- | --- |
 | Plano de Teste | [Link do google docs](https://docs.google.com/document/d/1b40d0Y7q8RmNOTqsJ-dV7mlSIBAJlqY2Q8F_PGl12M0/edit?usp=sharing) |
-| Casos de teste manuais | _adicionar link_ |
+| Casos de teste | [Link do google docs](https://docs.google.com/document/d/1cpsUYGmLNs6N2mYzDVKepaeZyxAlKNn6bANoqa1tXVU/edit?usp=sharing) |
 | Relatório de inspeção de código | _adicionar link_ |
 | Medidas ISO/IEC 25010 | _adicionar link_ |
 
@@ -37,8 +36,8 @@ versões.
 
 ## Equipe e responsabilidades
 
-| Integrante | GitHub | Responsabilidades | Classes sob teste |
-| --- | --- | --- | --- |
-| Eloyse Fernanda | [@elojas2](https://github.com/elojas2) | _preencher_ | _preencher_ |
-| Natalia de Abreu Lamas | _@usuario_ | _preencher_ | _preencher_ |
-| Alexandre Porto | _@usuario_ | _preencher_ | _preencher_ |
+| Integrante | GitHub | Classes sob teste |
+| --- | --- | --- |
+| Eloyse Fernanda | [@elojas2](https://github.com/elojas2) | CaixaServiceTest.java |
+| Natalia de Abreu Lamas | _@usuario_ | _preencher_ |
+| Alexandre Porto | _@usuario_ | _preencher_ |
