@@ -1,6 +1,7 @@
-package net.originmobi.pdv;
+package net.originmobi.pdv.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,11 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import net.originmobi.pdv.enumerado.ajuste.AjusteStatus;
 import net.originmobi.pdv.model.Ajuste;
-import net.originmobi.pdv.model.Produto;
 import net.originmobi.pdv.model.AjusteProduto;
+import net.originmobi.pdv.model.Produto;
 import net.originmobi.pdv.repository.AjusteRepository;
-import net.originmobi.pdv.service.AjusteService;
-import net.originmobi.pdv.service.ProdutoService;
 
 @ExtendWith(MockitoExtension.class)
 public class AjusteServiceTest {
@@ -43,6 +43,7 @@ public class AjusteServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção ao tentar processar ajuste já processado")
     void processar_AjusteJaProcessado_DeveLancarExcecao() {
         ajuste.setStatus(AjusteStatus.PROCESSADO);
         when(ajusteRepository.findById(1L)).thenReturn(Optional.of(ajuste));
@@ -55,6 +56,7 @@ public class AjusteServiceTest {
     }
 
     @Test
+    @DisplayName("Deve processar com sucesso ajuste válido com produtos")
     void processar_AjusteValidoComProduto_DeveProcessarComSucesso() {
         ajuste.setStatus(AjusteStatus.APROCESSAR);
         
@@ -79,6 +81,7 @@ public class AjusteServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção ao tentar remover ajuste já processado")
     void remover_AjusteJaProcessado_DeveLancarExcecao() {
         ajuste.setStatus(AjusteStatus.PROCESSADO);
 
@@ -91,6 +94,7 @@ public class AjusteServiceTest {
     }
 
     @Test
+    @DisplayName("Deve remover ajuste a processar com sucesso")
     void remover_AjusteAProcessar_DeveRemoverComSucesso() {
         ajuste.setStatus(AjusteStatus.APROCESSAR);
 
@@ -99,5 +103,15 @@ public class AjusteServiceTest {
         });
 
         verify(ajusteRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção ao processar código de ajuste inexistente")
+    void processar_AjusteInexistente_DeveLancarExcecao() {
+        when(ajusteRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> {
+            ajusteService.processar(999L, "Ajuste inexistente");
+        });
     }
 }
