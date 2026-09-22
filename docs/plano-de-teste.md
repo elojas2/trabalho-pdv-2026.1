@@ -38,7 +38,7 @@
 | --- | --- | --- | --- |
 | 0.1 | 19/09/2026 | Eloyse Fernanda | Estruturação inicial do plano conforme template da disciplina; definição de escopo, ambiente, ferramentas e classe sob teste do módulo Caixa |
 | 0.2 | 22/09/2026 | Alexandre Porto | Inclusão da classe sob teste do módulo Venda (`VendaService`), da funcionalidade de testes manuais (fechamento de venda) e planejamento dos casos de teste unitários |
-| 0.3 | a definir | Natalia de Abreu Lamas | a definir |
+| 0.3 | 22/09/2026 | Natalia de Abreu Lamas | Inclusão da classe sob teste do módulo Estoque (`AjusteService`), das funcionalidades de testes manuais e planejamento dos casos de teste unitários |
 
 ---
 
@@ -75,7 +75,7 @@ entidade e devem apresentar complexidade razoável.
 | Módulo | Classe sob teste | Justificativa da escolha | Responsável |
 | --- | --- | --- | --- |
 | Caixa | `net.originmobi.pdv.service.CaixaService` | Regra de negócio de abertura e fechamento de caixa. Concentra a maior densidade de pontos de decisão da camada de serviço. Possui desvios encadeados por tipo de caixa (CAIXA/COFRE/BANCO), operadores ternários aninhados, normalização de valores nulos, validação de senha e blocos `try/catch`. Não é CRUD de entidade. | Eloyse Fernanda |
-| a definir | a definir | a definir | Natalia de Abreu Lamas |
+| Estoque | `net.originmobi.pdv.service.AjusteService` | Regra de negócio do módulo de ajuste de estoque. Responsável por processar e aplicar alterações de inventário nos produtos, atualizar saldos e controlar bloqueios de exclusão. Contém tratamento de exceções com blocos try/catch e integração com ProdutoService. Não é CRUD de entidade. | Natalia de Abreu Lamas |
 | Venda | `net.originmobi.pdv.service.VendaService` | Regra de negócio do módulo de vendas. Orquestra abertura, adição/remoção de produtos e fechamento de venda com múltiplas formas de pagamento (dinheiro, cartão débito/crédito, a prazo). Contém laços, desvios encadeados sobre tipo de pagamento e título, operadores ternários, normalização de valores, guardas de validação e blocos `try/catch`. Complexidade ciclomática estimada ≥ 20. Não é CRUD de entidade. Domínio distinto do módulo Caixa já coberto por Eloyse. | Alexandre Porto |
 
 **Funcionalidades no escopo dos testes manuais:**
@@ -83,7 +83,7 @@ entidade e devem apresentar complexidade razoável.
 | Funcionalidade | Responsável |
 | --- | --- |
 | Abertura e fechamento de caixa | Eloyse Fernanda |
-| a definir | Natalia de Abreu Lamas |
+| Processamento e validação de remoção de Ajuste de Estoque | Natalia de Abreu Lamas |
 | Fechamento de venda (à vista em dinheiro, cartão débito/crédito e a prazo) | Alexandre Porto |
 
 #### 1.1.2 Fora do escopo
