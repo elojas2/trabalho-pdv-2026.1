@@ -12,7 +12,7 @@ teste e qualidade produzidos pelo grupo.
 | Integrante | GitHub |
 | --- | --- |
 | Eloyse Fernanda | [@elojas2](https://github.com/elojas2) |
-| Natalia de Abreu Lamas | — |
+| Natalia de Abreu Lamas | [@natalialamas73](https://github.com/natalialamas73) |
 | Alexandre Porto | [@AlexPortoNascimento](https://github.com/AlexPortoNascimento) |
 
 As responsabilidades de cada integrante e as classes sob teste estão em
