@@ -133,16 +133,48 @@ Para testes gerados ou melhorados com auxílio de IA, preserve também:
 
 ---
 
-## AI-007 — _título da próxima interação_
+## AI-007 — Geração da suíte de testes unitários inicial para AjusteService
 
 | Campo | Conteúdo |
 | --- | --- |
-| **Data** | |
-| **Responsável** | |
-| **Atividade** | |
-| **Ferramenta** | |
-| **Prompt/instrução** | |
-| **Resultado** | |
-| **Decisão** | |
-| **Validação** | |
-| **Transcrição** | |
+| **Data** | 2026-09-22 |
+| **Responsável** | Natalia de Abreu Lamas |
+| **Atividade** | Entrega 1 — implementação dos testes unitários da classe AjusteService |
+| **Ferramenta** | Gemini |
+| **Prompt/instrução** | Requisitada a criação da suíte inicial de testes unitários em Java com JUnit 5 e Mockito para cobrir os métodos da classe `AjusteService`. |
+| **Resultado** | A IA gerou a classe de teste inicial `AjusteServiceTest.java` com 4 cenários básicos cobrindo chamadas simples de processamento e remoção de ajustes de estoque. |
+| **Decisão** | **Aceito:** a estrutura base da classe de teste com `@InjectMocks` e `@Mock`. **Ajustado:** o código foi salvo como versão v0 em [`transcricoes/AI-007-v0-AjusteServiceTest.java`](transcricoes/AI-007-v0-AjusteServiceTest.java) para posterior refatoração e ampliação de cobertura. |
+| **Validação** | Verificação do código gerado, identificando ausência de cobertura para exceções nos blocos `try/catch` e asserções nas chamadas do `ProdutoService`. |
+| **Transcrição** | Prompts em [`transcricoes/AI-007-prompts-AjusteService.md`](transcricoes/AI-007-prompts-AjusteService.md); solução v0 em [`transcricoes/AI-007-v0-AjusteServiceTest.java`](transcricoes/AI-007-v0-AjusteServiceTest.java). |
+
+---
+
+## AI-008 — Refatoração, cobertura de exceções e finalização de AjusteServiceTest
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Natalia de Abreu Lamas |
+| **Atividade** | Entrega 1 — revisão crítica e ampliação de cobertura dos testes unitários de `AjusteService` |
+| **Ferramenta** | Gemini |
+| **Prompt/instrução** | "Analise a classe AjusteService e identifique se os testes cobrem todos os fluxos de exceção, os blocos try/catch e a verificação do serviço de estoque (ProdutoService)." |
+| **Resultado** | A IA refatorou a suíte para 7 casos de teste, adicionando verificações para `produtoService.ajusteEstoque(...)`, cobertura dos lançamentos de exceção ao tentar alterar estoque ou deletar registros com falha, teste do método `busca` e anotações `@DisplayName`. |
+| **Decisão** | **Aceito:** inclusão dos cenários de exceção e verificações do Mockito. **Alterado:** correção do pacote de importação para `net.originmobi.pdv` e remoção de caracteres de sintaxe inválidos (`};;`). |
+| **Validação** | A suíte final em `src/test/java/net/originmobi/pdv/AjusteServiceTest.java` compila e cobre todos os cenários principais e fluxos de exceção da classe `AjusteService`. |
+| **Transcrição** | Relatório de alterações em [`transcricoes/AI-008-alteracoes-v0-para-final-AjusteService.md`](transcricoes/AI-008-alteracoes-v0-para-final-AjusteService.md). |
+
+---
+
+## AI-009 — Elaboração e estruturação dos Casos de Teste Manuais do módulo Ajuste de Estoque
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Natalia de Abreu Lamas |
+| **Atividade** | Entrega 1 — especificação dos casos de teste manuais e validação de regras de negócio de `AjusteService` |
+| **Ferramenta** | Gemini |
+| **Prompt/instrução** | Solicitação de estruturação de casos de teste manuais para o módulo de Ajuste de Estoque, cobrindo o fluxo principal de processamento de entrada e o cenário de bloqueio de remoção de ajustes já processados. |
+| **Resultado** | A IA produziu a especificação formatada dos casos de teste `CT-AJU-001` (Processamento com Sucesso) e `CT-AJU-002` (Bloqueio de Remoção de Ajuste Processado), incluindo pré-condições, massa de dados, passos a passos detalhados e resultados esperados. |
+| **Decisão** | **Aceito:** a estrutura dos cenários e as mensagens de validação alinhadas ao comportamento real da aplicação. **Alterado:** inclusão explícita dos parâmetros de justificativa de inventário e checagem de atualização do saldo do produto. |
+| **Validação** | Verificação das regras de negócio diretamente no código de `AjusteService.java` para garantir correspondência exata entre os resultados esperados no teste manual e as mensagens retornadas pela aplicação. |
+| **Transcrição** | Não preservada |
