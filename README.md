@@ -13,7 +13,7 @@ teste e qualidade produzidos pelo grupo.
 | --- | --- |
 | Eloyse Fernanda | [@elojas2](https://github.com/elojas2) |
 | Natalia de Abreu Lamas | — |
-| Alexandre Porto | — |
+| Alexandre Porto | [@AlexPortoNascimento](https://github.com/AlexPortoNascimento) |
 
 As responsabilidades de cada integrante e as classes sob teste estão em
 [`docs/README.md`](docs/README.md).

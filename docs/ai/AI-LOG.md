@@ -85,7 +85,55 @@ Para testes gerados ou melhorados com auxílio de IA, preserve também:
 
 ---
 
-## AI-004 — _título da próxima interação_
+## AI-004 — Seleção da classe sob teste e planejamento dos casos de teste unitários de `VendaService`
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 1 — seleção da classe sob teste do módulo Venda e planejamento dos casos de teste unitários, dos testes manuais e das modificações no Plano de Teste |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local) |
+| **Prompt/instrução** | "Leia o arquivo Trabalho - Qualidade e Teste.pdf e guarde em seu contexto, ele é a fonte da verdade sobre tudo que precisará ser feito. [...] Faça um planejamento para realizar a minha parte do trabalho (Alexandre). Só deve ser considerado a entrega 1 no momento. Procure uma classe para criar os casos de testes que seja diferente do caso feito pela Eloyse. Ela fez o CaixaServiceTest. Me explique pq essa classe escolhida atende todos os requisitos apresentados no documento para ela ser escolhida. Vale ressaltar que ela deve ter uma complexidade ciclomática de pelo menos 10. Inclua no plano todas as modificações que precisam ser feitas no docs/plano-de-teste.md." |
+| **Resultado** | A IA leu o enunciado (PDF indexado via knowledge base), todos os services do projeto (`VendaService`, `RecebimentoService`, `PagarService`, `CartaoLancamentoService`, `ProdutoService`, `AjusteService`), a estrutura de testes existente e o `plano-de-teste.md`. Produziu: (a) justificativa detalhada da escolha de `VendaService` como classe sob teste (não é CRUD, complexidade ciclomática estimada ≥ 20 com ~32 pontos de decisão, domínio diferente de `CaixaService`); (b) plano de 10 tasks cobrindo implementação dos testes unitários (≥ 18 casos sobre todos os métodos públicos), testes manuais do módulo Venda, atualizações no `plano-de-teste.md` e no `docs/README.md`, e registro no AI-LOG. |
+| **Decisão** | **Aceito:** a escolha de `VendaService` como classe sob teste; a estrutura do plano em 10 tasks; os casos de teste propostos para cada método. **A definir pelo Alexandre:** aprovação ou ajuste do plano antes de iniciar a implementação; escolha de quais casos de teste manuais executar primeiro. **Deixado em aberto:** campos "Decisão" e "Validação" desta entrada, a serem preenchidos após execução. |
+| **Validação** | A ser preenchido após execução das tasks e confirmação de que a suíte passa. |
+| **Transcrição** | Não preservada |
+
+---
+
+## AI-005 — Implementação da Task 1 (plano-de-teste.md) e Task 2 (VendaServiceTest.java — estrutura base e testes de abreVenda)
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 1 — atualização do Plano de Teste com responsabilidades do Alexandre e implementação da estrutura base de `VendaServiceTest` com os casos de teste do método `abreVenda` |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local) |
+| **Prompt/instrução** | (1) "Realize a task 1: Atualizar docs/plano-de-teste.md com as responsabilidades do Alexandre."; (2) "Antes de prosseguir para as proximas tasks, faça uma modificação importante. Você atuará como um testador. Um profissional que deve buscar por erros na aplicação. A demo não pode ser os testes passarem, mas sim os testes cobrirem as funcionalidades. A cobertura dos testes deve ser a maior possível. Falhas em teste são esperadas."; (3) "Sim, prossiga para a task 2 — Implementar VendaServiceTest.java — estrutura base e testes de abreVenda" |
+| **Resultado** | **Task 1:** preenchimento de três seções do `plano-de-teste.md`: (a) linha do Alexandre na tabela de classes sob teste, com módulo Venda, classe `VendaService` e justificativa completa; (b) linha de funcionalidades de testes manuais com "Fechamento de venda"; (c) entrada 0.2 no Registro de Mudanças. **Task 2:** criação de `src/test/java/net/originmobi/pdv/VendaServiceTest.java` com infraestrutura completa (11 mocks, `MockedStatic<Aplicacao>`, helpers `dadoUsuarioAutenticado`/`novaVenda`/`vendaExistente`) e 11 casos de teste para `abreVenda` (7 para venda nova, incluindo um caso que documenta defeito de exceção silenciada; 4 para venda existente). Identificado e documentado um defeito real: no ramo de venda nova, `save` lança exceção mas o `catch` a descarta via `e.getStackTrace()`, retornando `null` ao chamador sem qualquer sinalização de falha. Arquivo compila com `BUILD SUCCESS` verificado via `mvn test-compile`. |
+| **Decisão** | **Aceito:** mudança de perspectiva de testador (asserções pelo contrato esperado, não pelo comportamento atual); estrutura de mocks seguindo o padrão de `CaixaServiceTest`; uso de `assertThrows` para documentar defeito (o teste falha intencionalmente, evidenciando o bug). **Alterado:** uso da forma de 2 argumentos em `assertThrows` (sem mensagem inline) para compatibilidade com inferência de tipos do compilador Java 8. **Rejeitado:** nenhum item rejeitado nesta sessão. |
+| **Validação** | Compilação verificada: `mvn test-compile -Dmaven.resources.skip=true` → `BUILD SUCCESS`, `VendaServiceTest.class` (11K) gerado em `target/test-classes/`. Nota: o skip de recursos é necessário porque `target/classes` contém arquivos pertencentes a `root` (artefatos de build anterior via Docker) que bloqueiam o passo de cópia de recursos. O código Java compila sem erros. |
+| **Transcrição** | Conversa preservada em [`transcricoes/AI-005-task1-task2-VendaServiceTest.md`](transcricoes/AI-005-task1-task2-VendaServiceTest.md). |
+
+---
+
+## AI-006 — Implementação das Tasks 3-7 (VendaServiceTest — busca, addProduto, removeProduto, fechaVenda, qtdAbertos)
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-09-22 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 1 — implementação dos casos de teste unitários para os métodos `busca`, `addProduto`, `removeProduto`, `fechaVenda` (guards e caminhos felizes) e `qtdAbertos` de `VendaService` |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local) |
+| **Prompt/instrução** | "Agora realize as tasks de 3 a 7. Ao final, crie o AI-006 em docs/ai/AI-LOG.md e faça o novo documento de transcrição AI-006" |
+| **Resultado** | Adicionados ~20 novos casos de teste ao `VendaServiceTest.java`, cobrindo: (a) `busca` — 3 casos (filtro por código, situação ABERTA, situação FECHADA); (b) `addProduto` — 3 casos incluindo defeito de exceção silenciada; (c) `removeProduto` — 3 casos incluindo defeito crítico de `return` dentro de `try` ignorado; (d) `fechaVenda` guards — 5 casos (venda fechada, valor zero, valor negativo, caixa fechado, sem cliente); (e) `fechaVenda` caminhos felizes — 6 casos (à vista dinheiro: lançamento caixa, retorno sucesso, movimentação estoque, fechamento com FECHADA; cartão débito; cartão crédito); (f) `fechaVenda` a prazo — 1 caso (geração de parcela com sequência=1); (g) `qtdAbertos` — 1 caso. Total acumulado na suíte: ~30 casos. Identificados e documentados 3 novos defeitos além do já registrado em AI-005. BUILD SUCCESS confirmado (`VendaServiceTest.class` de 26K). |
+| **Decisão** | **Aceito:** cobertura de todos os métodos públicos; uso de strings literais (`"DIN"`, `"CARTDEB"`, `"CARTCRED"`) em vez do enum `TituloTipo` para evitar conflito de nomes com a entidade JPA homônima; remoção dos stubs incorretos de `when(receberServ.cadastrar(...)).thenReturn(...)` (método `void`). **Defeitos documentados como testes que falham intencionalmente:** ver seção de transcrição. **A definir pelo Alexandre:** criação dos GitHub Issues para os defeitos encontrados. |
+| **Validação** | `mvn test-compile -Dmaven.resources.skip=true` → `BUILD SUCCESS`. `VendaServiceTest.class` (26K) em `target/test-classes/`. |
+| **Transcrição** | [`transcricoes/AI-006-tasks3-7-VendaServiceTest.md`](transcricoes/AI-006-tasks3-7-VendaServiceTest.md) |
+
+---
+
+## AI-007 — _título da próxima interação_
 
 | Campo | Conteúdo |
 | --- | --- |

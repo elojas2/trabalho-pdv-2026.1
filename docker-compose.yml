@@ -14,7 +14,11 @@ services:
       - bash
       - -c
       - >
-        mvn package -DskipTests &&
+        mvn package -DskipTests
+        -Dmaven.wagon.http.ssl.insecure=true
+        -Dmaven.wagon.http.ssl.allowall=true
+        -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+        -Dmaven.resolver.transport=wagon &&
         java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005 -jar target/pdv-0.0.1-SNAPSHOT.war
     
   pdv-db:
