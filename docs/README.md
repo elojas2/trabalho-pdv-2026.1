@@ -40,5 +40,5 @@ versões.
 | Integrante | GitHub | Responsabilidades | Classes sob teste |
 | --- | --- | --- | --- |
 | Eloyse Fernanda | [@elojas2](https://github.com/elojas2) | _preencher_ | _preencher_ |
-| Natalia de Abreu Lamas | _@usuario_ | _preencher_ | _preencher_ |
+| Natalia de Abreu Lamas | [@natalialamas73](https://github.com/natalialamas73) | Testes unitários e manuais | AjusteService |
 | Alexandre Porto | _@usuario_ | _preencher_ | _preencher_ |
