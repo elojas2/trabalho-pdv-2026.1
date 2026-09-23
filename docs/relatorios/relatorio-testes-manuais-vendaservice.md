@@ -146,14 +146,14 @@
 
 ## Defeitos encontrados
 
-| Defeito | Título | Documento |
-| --- | --- | --- |
-| DEF-VENDA-001 | Fechamento sem título lança "Zero length string" | [ficha](../defeitos/DEF-VENDA-001-zero-length-string.md) |
-| DEF-VENDA-002 | Cartão débito/crédito não fecha a venda (NPE) | [ficha](../defeitos/DEF-VENDA-002-cartao-nao-fecha.md) |
-| DEF-VENDA-003 | Desconto e acréscimo aplicados trocados | [ficha](../defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) |
-| DEF-ESTOQUE-001 | Entrada de estoque não aumenta o saldo (impedimento) | [ficha](../defeitos/DEF-ESTOQUE-001-entrada-nao-aumenta-saldo.md) |
+| Defeito | Título | Documento | Issue |
+| --- | --- | --- | --- |
+| DEF-VENDA-001 | Fechamento sem título lança "Zero length string" | [ficha](../defeitos/DEF-VENDA-001-zero-length-string.md) | [#11](https://github.com/elojas2/trabalho-pdv-2026.1/issues/11) |
+| DEF-VENDA-002 | Cartão débito/crédito não fecha a venda (NPE) | [ficha](../defeitos/DEF-VENDA-002-cartao-nao-fecha.md) | [#12](https://github.com/elojas2/trabalho-pdv-2026.1/issues/12) |
+| DEF-VENDA-003 | Desconto e acréscimo aplicados trocados | [ficha](../defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) | [#13](https://github.com/elojas2/trabalho-pdv-2026.1/issues/13) |
+| DEF-ESTOQUE-001 | Entrada de estoque não aumenta o saldo (impedimento) | [ficha](../defeitos/DEF-ESTOQUE-001-entrada-nao-aumenta-saldo.md) | [#14](https://github.com/elojas2/trabalho-pdv-2026.1/issues/14) |
 
 ## Pendências
 
-- [ ] Abrir as Issues no GitHub para cada defeito e referenciá-las nas fichas.
+- [x] Abrir as Issues no GitHub para cada defeito e referenciá-las nas fichas (issues [#11](https://github.com/elojas2/trabalho-pdv-2026.1/issues/11)–[#14](https://github.com/elojas2/trabalho-pdv-2026.1/issues/14)).
 - [ ] Cadastrar ao menos um caso (sugestão: CT-VENDA-01) no TestLink.

@@ -76,4 +76,4 @@ para `..., Double desc, Double acre`) e revisar o cálculo interno
 
 ## Rastreamento
 
-- [ ] Abrir Issue correspondente no GitHub e referenciar aqui.
+- [x] Abrir Issue correspondente no GitHub e referenciar aqui: [#13](https://github.com/elojas2/trabalho-pdv-2026.1/issues/13).

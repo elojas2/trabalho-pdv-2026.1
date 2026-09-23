@@ -57,4 +57,4 @@ chamada `getTaxa_debito()` lança **`NullPointerException`**. A exceção sobe p
 ## Rastreamento
 
 - [ ] Anexar print/stack trace do erro.
-- [ ] Abrir Issue correspondente no GitHub e referenciar aqui.
+- [x] Abrir Issue correspondente no GitHub e referenciar aqui: [#12](https://github.com/elojas2/trabalho-pdv-2026.1/issues/12).

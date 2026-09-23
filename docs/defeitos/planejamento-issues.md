@@ -25,16 +25,16 @@ organiza em issues prontas para abrir no GitHub:
 
 ## Mapa de defeitos → issues
 
-| # | Origem | Defeito | Método/Arquivo | Severidade | Ficha |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Unitário | `abreVenda` engole exceção do `save` e retorna `null` | `VendaService.abreVenda` | Alta | — |
-| 2 | Unitário | `addProduto` engole exceção e retorna `"ok"` | `VendaService.addProduto` | Alta | — |
-| 3 | Unitário | `removeProduto` sempre retorna `"ok"` (return dentro do try ignorado) | `VendaService.removeProduto` | Média | — |
-| 4 | Unitário | `fechaVenda` fecha a venda N vezes (chamada dentro do laço) | `VendaService.fechaVenda` | Média | — |
-| 5 | Manual | Fechamento sem título lança `"Zero length string"` | `VendaService.fechaVenda` / `VendaController.fechar` | Alta | DEF-VENDA-001 |
-| 6 | Manual | Cartão débito/crédito não fecha a venda (NPE) | `CartaoLancamentoService.lancamento` | Alta | DEF-VENDA-002 |
-| 7 | Manual | Desconto e acréscimo aplicados trocados | `VendaService.aprazo` / `avistaDinheiro` | Alta | DEF-VENDA-003 |
-| 8 | Manual | Entrada de estoque não aumenta o saldo (trigger) | `V1__cria_estrutura_inicial.sql` | Alta | DEF-ESTOQUE-001 |
+| # | Origem | Defeito | Método/Arquivo | Severidade | Ficha | Issue |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Unitário | `abreVenda` engole exceção do `save` e retorna `null` | `VendaService.abreVenda` | Alta | — | [#7](https://github.com/elojas2/trabalho-pdv-2026.1/issues/7) |
+| 2 | Unitário | `addProduto` engole exceção e retorna `"ok"` | `VendaService.addProduto` | Alta | — | [#8](https://github.com/elojas2/trabalho-pdv-2026.1/issues/8) |
+| 3 | Unitário | `removeProduto` sempre retorna `"ok"` (return dentro do try ignorado) | `VendaService.removeProduto` | Média | — | [#9](https://github.com/elojas2/trabalho-pdv-2026.1/issues/9) |
+| 4 | Unitário | `fechaVenda` fecha a venda N vezes (chamada dentro do laço) | `VendaService.fechaVenda` | Média | — | [#10](https://github.com/elojas2/trabalho-pdv-2026.1/issues/10) |
+| 5 | Manual | Fechamento sem título lança `"Zero length string"` | `VendaService.fechaVenda` / `VendaController.fechar` | Alta | DEF-VENDA-001 | [#11](https://github.com/elojas2/trabalho-pdv-2026.1/issues/11) |
+| 6 | Manual | Cartão débito/crédito não fecha a venda (NPE) | `CartaoLancamentoService.lancamento` | Alta | DEF-VENDA-002 | [#12](https://github.com/elojas2/trabalho-pdv-2026.1/issues/12) |
+| 7 | Manual | Desconto e acréscimo aplicados trocados | `VendaService.aprazo` / `avistaDinheiro` | Alta | DEF-VENDA-003 | [#13](https://github.com/elojas2/trabalho-pdv-2026.1/issues/13) |
+| 8 | Manual | Entrada de estoque não aumenta o saldo (trigger) | `V1__cria_estrutura_inicial.sql` | Alta | DEF-ESTOQUE-001 | [#14](https://github.com/elojas2/trabalho-pdv-2026.1/issues/14) |
 
 ---
 

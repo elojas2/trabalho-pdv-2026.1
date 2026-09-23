@@ -21,12 +21,20 @@ referenciado não é avaliado.
 Fichas dos defeitos encontrados nos testes (o rastreador oficial é o GitHub
 Issues; estas fichas documentam a análise e as evidências).
 
-| Defeito | Módulo | Título | Ficha |
-| --- | --- | --- | --- |
-| DEF-VENDA-001 | Venda | Fechamento sem título lança "Zero length string" | [ficha](defeitos/DEF-VENDA-001-zero-length-string.md) |
-| DEF-VENDA-002 | Venda | Cartão débito/crédito não fecha a venda (NPE) | [ficha](defeitos/DEF-VENDA-002-cartao-nao-fecha.md) |
-| DEF-VENDA-003 | Venda | Desconto e acréscimo aplicados trocados | [ficha](defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) |
-| DEF-ESTOQUE-001 | Estoque | Entrada de estoque não aumenta o saldo (trigger) | [ficha](defeitos/DEF-ESTOQUE-001-entrada-nao-aumenta-saldo.md) |
+| Defeito | Módulo | Título | Ficha | Issue |
+| --- | --- | --- | --- | --- |
+| DEF-VENDA-001 | Venda | Fechamento sem título lança "Zero length string" | [ficha](defeitos/DEF-VENDA-001-zero-length-string.md) | [#11](https://github.com/elojas2/trabalho-pdv-2026.1/issues/11) |
+| DEF-VENDA-002 | Venda | Cartão débito/crédito não fecha a venda (NPE) | [ficha](defeitos/DEF-VENDA-002-cartao-nao-fecha.md) | [#12](https://github.com/elojas2/trabalho-pdv-2026.1/issues/12) |
+| DEF-VENDA-003 | Venda | Desconto e acréscimo aplicados trocados | [ficha](defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) | [#13](https://github.com/elojas2/trabalho-pdv-2026.1/issues/13) |
+| DEF-ESTOQUE-001 | Estoque | Entrada de estoque não aumenta o saldo (trigger) | [ficha](defeitos/DEF-ESTOQUE-001-entrada-nao-aumenta-saldo.md) | [#14](https://github.com/elojas2/trabalho-pdv-2026.1/issues/14) |
+
+Defeitos expostos pelos testes unitários (sem ficha própria; documentados nos
+comentários de `VendaServiceTest`): issues
+[#7](https://github.com/elojas2/trabalho-pdv-2026.1/issues/7),
+[#8](https://github.com/elojas2/trabalho-pdv-2026.1/issues/8),
+[#9](https://github.com/elojas2/trabalho-pdv-2026.1/issues/9) e
+[#10](https://github.com/elojas2/trabalho-pdv-2026.1/issues/10). Planejamento
+completo em [`defeitos/planejamento-issues.md`](defeitos/planejamento-issues.md).
 
 ## Documentos editáveis (Google Docs)
 

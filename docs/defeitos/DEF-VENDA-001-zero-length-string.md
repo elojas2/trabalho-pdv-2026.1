@@ -76,4 +76,4 @@ Validar as entradas antes de decodificar:
 
 ## Rastreamento
 
-- [ ] Abrir Issue correspondente no GitHub e referenciar aqui.
+- [x] Abrir Issue correspondente no GitHub e referenciar aqui: [#11](https://github.com/elojas2/trabalho-pdv-2026.1/issues/11).

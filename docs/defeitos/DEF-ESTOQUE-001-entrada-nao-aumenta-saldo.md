@@ -82,5 +82,5 @@ END IF;
 ## Rastreamento
 
 - [ ] Anexar print do saldo permanecendo 0 após processar o ajuste.
-- [ ] Abrir Issue correspondente no GitHub e referenciar aqui.
+- [x] Abrir Issue correspondente no GitHub e referenciar aqui: [#14](https://github.com/elojas2/trabalho-pdv-2026.1/issues/14).
 - [ ] Coordenar com a responsável pelo módulo Estoque (Natalia).
