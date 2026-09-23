@@ -9,10 +9,24 @@ referenciado não é avaliado.
 | Diretório / arquivo | Conteúdo |
 | --- | --- |
 | [`plano-de-teste.md`](plano-de-teste.md) | Plano de Teste: escopo, estratégia, ferramentas, critérios de entrada/saída |
-| [`relatorios/`](relatorios/) | Relatórios de cobertura (JaCoCo), mutação (PIT) e inspeção estática (SonarQube) |
+| [`relatorios/`](relatorios/) | Relatórios de cobertura (JaCoCo), mutação (PIT), inspeção estática (SonarQube) e relatórios de testes manuais |
+| [`relatorios/relatorio-testes-manuais-vendaservice.md`](relatorios/relatorio-testes-manuais-vendaservice.md) | Relatório de testes manuais de `VendaService` (fechamento de venda), com evidências |
+| [`defeitos/`](defeitos/) | Fichas de defeitos encontrados durante os testes |
 | [`ai/AI-LOG.md`](ai/AI-LOG.md) | Registro obrigatório do uso de Inteligência Artificial |
 | [`ai/transcricoes/`](ai/transcricoes/) | Conversas, prompts e configurações completas de ferramentas de IA |
 | [`apresentacoes/`](apresentacoes/) | Slides das apresentações parcial e final |
+
+## Defeitos registrados
+
+Fichas dos defeitos encontrados nos testes (o rastreador oficial é o GitHub
+Issues; estas fichas documentam a análise e as evidências).
+
+| Defeito | Módulo | Título | Ficha |
+| --- | --- | --- | --- |
+| DEF-VENDA-001 | Venda | Fechamento sem título lança "Zero length string" | [ficha](defeitos/DEF-VENDA-001-zero-length-string.md) |
+| DEF-VENDA-002 | Venda | Cartão débito/crédito não fecha a venda (NPE) | [ficha](defeitos/DEF-VENDA-002-cartao-nao-fecha.md) |
+| DEF-VENDA-003 | Venda | Desconto e acréscimo aplicados trocados | [ficha](defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) |
+| DEF-ESTOQUE-001 | Estoque | Entrada de estoque não aumenta o saldo (trigger) | [ficha](defeitos/DEF-ESTOQUE-001-entrada-nao-aumenta-saldo.md) |
 
 ## Documentos editáveis (Google Docs)
 
@@ -40,4 +54,4 @@ versões.
 | --- | --- | --- | --- |
 | Eloyse Fernanda | [@elojas2](https://github.com/elojas2) | _preencher_ | _preencher_ |
 | Natalia de Abreu Lamas | [@natalialamas73](https://github.com/natalialamas73) | Testes unitários e manuais | AjusteService |
-| Alexandre Porto | _@usuario_ | _preencher_ | _preencher_ |
+| Alexandre Porto | [@AlexPortoNascimento](https://github.com/AlexPortoNascimento) | Testes unitários e manuais | VendaService |

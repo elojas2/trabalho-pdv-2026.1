@@ -14,17 +14,17 @@
 ## Passos para reproduzir
 
 1. Abrir venda com produtos totalizando **R$ 3,50**.
-2. No modal de pagamento, informar **Desconto = 1,50** e **Acréscimo = 1,45**.
-3. Fechar a venda (à vista em dinheiro ou a prazo).
+2. No modal de pagamento, informar **Desconto = 1,00** e **Acréscimo = 0,95**.
+3. Fechar a venda (à vista em dinheiro).
 
 ## Resultado obtido
 
-O valor da parcela/recebimento permanece **3,50** (observado: "Valor segue
-3,50"). Esperava-se **3,45**.
+O sistema exibe "Venda finalizada com sucesso", mas o valor final gravado
+permanece **R$ 3,50** (venda FECHADA com R$ 3,50). Esperava-se **R$ 3,45**.
 
 ## Resultado esperado
 
-Valor final = `(produtos + acréscimo) − desconto` = `(3,50 + 1,45) − 1,50` =
+Valor final = `(produtos + acréscimo) − desconto` = `(3,50 + 0,95) − 1,00` =
 **3,45**.
 
 ## Causa raiz (análise de código)
@@ -54,11 +54,10 @@ private int avistaDinheiro(..., int i, Double acre, Double desc) { ... }
 ```
 
 Ou seja, o que é passado como desconto é recebido como acréscimo e vice-versa.
-Dentro dos métodos o cálculo é `(valor + acre) − desc`, então com os papéis
-trocados o resultado fica incorreto quando desconto ≠ acréscimo. No caso de
-teste, `(3,50 + 1,50) − 1,45 = 5,05`? — o efeito exato depende do fluxo, mas o
-ponto confirmado em teste manual é que o valor **não** corresponde ao esperado
-`3,45`. Com desconto = acréscimo (ou ambos zero) o defeito fica mascarado.
+Dentro dos métodos o cálculo é `(valor + acre) − desc`. Com os papéis trocados,
+o valor final da venda não corresponde ao esperado quando desconto ≠ acréscimo —
+confirmado em teste manual (esperado R$ 3,45; obtido R$ 3,50). Com
+desconto = acréscimo (ou ambos zero) o defeito fica mascarado.
 
 > Observação: este defeito também não é coberto pelos testes unitários atuais,
 > pois todos usam desconto/acréscimo = 0. Recomenda-se adicionar caso unitário
@@ -70,7 +69,11 @@ Alinhar a ordem dos parâmetros entre a chamada e a assinatura (renomear/reorden
 para `..., Double desc, Double acre`) e revisar o cálculo interno
 `(valor + acre) − desc` para garantir a semântica correta.
 
+## Evidências
+
+- `docs/relatorios/evidenciasVendaService/Evidencia desc-acresc 1.png` — modal com desconto 1,00 e acréscimo 0,95, "Venda finalizada com sucesso".
+- `docs/relatorios/evidenciasVendaService/Evidencia desc-acresc 2.png` — pedido FECHADA com valor R$ 3,50.
+
 ## Rastreamento
 
-- [ ] Anexar print do valor incorreto no fechamento.
 - [ ] Abrir Issue correspondente no GitHub e referenciar aqui.

@@ -28,16 +28,15 @@
 | ID | Cenário | Status | Defeito |
 | --- | --- | --- | --- |
 | CT-VENDA-01 | À vista em dinheiro, caixa aberto, com título | Passou | — |
-| CT-VENDA-02 | À vista em dinheiro, caixa aberto, sem título selecionado | Falhou | [DEF-VENDA-001](../defeitos/DEF-VENDA-001-zero-length-string.md) |
+| CT-VENDA-02 | À vista em dinheiro, sem título selecionado | Falhou | [DEF-VENDA-001](../defeitos/DEF-VENDA-001-zero-length-string.md) |
 | CT-VENDA-03 | À vista cartão débito | Falhou | [DEF-VENDA-002](../defeitos/DEF-VENDA-002-cartao-nao-fecha.md) |
 | CT-VENDA-04 | À vista cartão crédito | Falhou | [DEF-VENDA-002](../defeitos/DEF-VENDA-002-cartao-nao-fecha.md) |
 | CT-VENDA-05 | A prazo sem cliente | Passou | — |
 | CT-VENDA-06 | Fechamento com desconto e acréscimo diferentes | Falhou | [DEF-VENDA-003](../defeitos/DEF-VENDA-003-desconto-acrescimo-trocados.md) |
-| CT-VENDA-07 | À vista em dinheiro com caixa fechado | Pendente | — |
-| CT-VENDA-08 | Venda sem valor / sem produtos | Pendente | — |
-| CT-VENDA-09 | Fechar venda já fechada | Pendente | — |
-| CT-VENDA-10 | Pagamento composto (ex.: `00/30`) | Pendente | — |
-| CT-VENDA-11 | Estoque insuficiente | Pendente | — |
+| CT-VENDA-07 | À vista em dinheiro com caixa fechado | Passou | — |
+| CT-VENDA-08 | Venda sem valor / sem produtos | Passou | — |
+| CT-VENDA-09 | Fechar venda já fechada | Passou | — |
+| CT-VENDA-10 | Estoque insuficiente | Passou | — |
 
 ## Casos de teste detalhados
 
@@ -45,11 +44,13 @@
 
 - **Pré-condições:** caixa aberto; título do tipo DIN cadastrado; venda aberta com produto.
 - **Passos:** modal de pagamento → forma à vista (`00`) → título Dinheiro → Pagar.
-- **Dados:** valor produtos conforme item; desconto 0; acréscimo 0.
+- **Dados:** valor produtos R$ 3,50; desconto 0; acréscimo 0.
 - **Resultado esperado:** venda FECHADA; lançamento de entrada no caixa; mensagem "Venda finalizada com sucesso".
-- **Resultado obtido:** sucesso, compra fechada.
+- **Resultado obtido:** "Venda finalizada com sucesso"; venda passa a FECHADA.
 - **Status:** Passou.
-- **Evidência:** _(anexar print)_
+- **Evidências:**
+  - ![Venda finalizada com sucesso](evidenciasVendaService/Evidencia%201.png)
+  - ![Pedido FECHADA](evidenciasVendaService/Evidencia%205.png)
 
 ### CT-VENDA-02 — À vista em dinheiro, sem título selecionado
 
@@ -58,54 +59,90 @@
 - **Resultado esperado:** mensagem de validação amigável ("selecione a forma/título de pagamento"); venda permanece ABERTA.
 - **Resultado obtido:** erro técnico **"Zero length string"**; venda não fecha.
 - **Status:** Falhou → **DEF-VENDA-001**.
-- **Evidência:** _(anexar print)_
+- **Evidência:**
+  - ![Zero length string](evidenciasVendaService/Evidencia%202.png)
 
 ### CT-VENDA-03 — À vista cartão débito
 
 - **Pré-condições:** título do tipo CARTDEB cadastrado; venda aberta com produto.
-- **Passos:** modal → forma à vista → título Cartão Débito → Pagar.
+- **Passos:** modal → forma à vista → título Débito → Pagar.
 - **Resultado esperado:** venda FECHADA; lançamento de cartão registrado.
-- **Resultado obtido:** **a venda não fecha** (falha no servidor).
-- **Status:** Falhou → **DEF-VENDA-002** (NullPointerException por título de cartão sem máquina associada).
-- **Evidência:** _(anexar print)_
+- **Resultado obtido:** **a venda não fecha**; erro "No message available" (NullPointerException).
+- **Status:** Falhou → **DEF-VENDA-002** (título de cartão sem máquina associada).
+- **Evidência:**
+  - ![Cartão débito - No message available](evidenciasVendaService/Evidencia%206.png)
 
 ### CT-VENDA-04 — À vista cartão crédito
 
 - **Pré-condições:** título do tipo CARTCRED cadastrado; venda aberta com produto.
-- **Passos:** modal → forma à vista → título Cartão Crédito → Pagar.
+- **Passos:** modal → forma à vista → título Crédito → Pagar.
 - **Resultado esperado:** venda FECHADA; lançamento de cartão registrado.
-- **Resultado obtido:** **a venda não fecha**.
+- **Resultado obtido:** **a venda não fecha**; erro "No message available" (NullPointerException).
 - **Status:** Falhou → **DEF-VENDA-002**.
-- **Evidência:** _(anexar print)_
+- **Evidência:**
+  - ![Cartão crédito - No message available](evidenciasVendaService/Evidencia%204.png)
 
 ### CT-VENDA-05 — A prazo sem cliente
 
 - **Pré-condições:** venda aberta **sem cliente**; forma a prazo.
 - **Passos:** modal → forma a prazo → Pagar.
 - **Resultado esperado:** bloqueio com mensagem "Venda sem cliente, verifique".
-- **Resultado obtido:** venda bloqueada, conforme esperado.
+- **Resultado obtido:** "Venda sem cliente, verifique"; venda bloqueada.
 - **Status:** Passou.
-- **Evidência:** _(anexar print)_
+- **Evidência:**
+  - ![Venda sem cliente, verifique](evidenciasVendaService/Evidencia%203.png)
 
 ### CT-VENDA-06 — Fechamento com desconto e acréscimo diferentes
 
 - **Pré-condições:** venda aberta com produtos totalizando R$ 3,50.
-- **Passos:** modal → desconto 1,50 e acréscimo 1,45 → Pagar.
-- **Dados:** produtos 3,50; desconto 1,50; acréscimo 1,45.
-- **Resultado esperado:** valor final = (3,50 + 1,45) − 1,50 = **R$ 3,45**.
-- **Resultado obtido:** valor permanece **R$ 3,50**.
+- **Passos:** modal → desconto 1,00 e acréscimo 0,95 → Pagar.
+- **Dados:** produtos 3,50; desconto 1,00; acréscimo 0,95.
+- **Resultado esperado:** valor final = (3,50 + 0,95) − 1,00 = **R$ 3,45**.
+- **Resultado obtido:** o sistema exibe "Venda finalizada com sucesso", mas o valor final gravado permanece **R$ 3,50** (venda FECHADA com R$ 3,50).
 - **Status:** Falhou → **DEF-VENDA-003** (desconto/acréscimo trocados nos métodos auxiliares).
-- **Evidência:** _(anexar print)_
+- **Evidências:**
+  - ![Desconto 1,00 e acréscimo 0,95 - venda finalizada](evidenciasVendaService/Evidencia%20desc-acresc%201.png)
+  - ![Pedido FECHADA com valor 3,50](evidenciasVendaService/Evidencia%20desc-acresc%202.png)
 
-### CT-VENDA-07 a CT-VENDA-11 — Pendentes
+### CT-VENDA-07 — À vista em dinheiro com caixa fechado
 
-Cenários planejados ainda não executados:
+- **Pré-condições:** **caixa fechado**; venda aberta com produto; título Dinheiro.
+- **Passos:** modal → forma à vista → título Dinheiro → Pagar.
+- **Resultado esperado:** erro "nenhum caixa aberto"; venda permanece ABERTA.
+- **Resultado obtido:** "nenhum caixa aberto"; venda não fecha.
+- **Status:** Passou.
+- **Evidência:**
+  - ![nenhum caixa aberto](evidenciasVendaService/Evidencia%207.png)
 
-- **CT-VENDA-07** — à vista em dinheiro com **caixa fechado**: esperado erro "nenhum caixa aberto"; venda permanece aberta.
-- **CT-VENDA-08** — **venda sem valor/sem produtos**: esperado "Venda sem valor, verifique".
-- **CT-VENDA-09** — **fechar venda já fechada**: esperado "venda fechada".
-- **CT-VENDA-10** — **pagamento composto** (ex.: `00/30`): verificar comportamento do laço; observar possível fechamento repetido e soma de parcelas.
-- **CT-VENDA-11** — **estoque insuficiente**: verificar se a venda fecha mesmo sem saldo (dependente de DEF-ESTOQUE-001).
+### CT-VENDA-08 — Venda sem valor / sem produtos
+
+- **Pré-condições:** venda aberta com valor total R$ 0,00.
+- **Passos:** modal → Pagar.
+- **Resultado esperado:** "Venda sem valor, verifique".
+- **Resultado obtido:** "Venda sem valor, verifique".
+- **Status:** Passou.
+- **Evidência:**
+  - ![Venda sem valor, verifique](evidenciasVendaService/Evidencia%208.png)
+
+### CT-VENDA-09 — Fechar venda já fechada
+
+- **Pré-condições:** venda já FECHADA.
+- **Passos:** reabrir a venda e tentar Pagar novamente.
+- **Resultado esperado:** venda permanece FECHADA; nova ação de fechamento não é permitida.
+- **Resultado obtido:** venda permanece FECHADA (botões de ação desabilitados).
+- **Status:** Passou.
+- **Evidência:**
+  - ![Pedido FECHADA com cliente](evidenciasVendaService/Evidencia%209.png)
+
+### CT-VENDA-10 — Estoque insuficiente
+
+- **Pré-condições:** produto que **controla estoque** com saldo menor que o vendido.
+- **Passos:** venda com o produto (ex.: Picolé R$ 6,50) → modal → forma à vista → título Dinheiro → Pagar.
+- **Resultado esperado:** bloqueio informando estoque insuficiente; venda não fecha.
+- **Resultado obtido:** "O produto de código 1 não tem estoque suficiente, verifique".
+- **Status:** Passou.
+- **Evidência:**
+  - ![Estoque insuficiente](evidenciasVendaService/Evidencia%2010.png)
 
 ## Defeitos encontrados
 
@@ -118,7 +155,5 @@ Cenários planejados ainda não executados:
 
 ## Pendências
 
-- [ ] Anexar as evidências (prints) de cada caso.
-- [ ] Executar os casos CT-VENDA-07 a CT-VENDA-11.
 - [ ] Abrir as Issues no GitHub para cada defeito e referenciá-las nas fichas.
 - [ ] Cadastrar ao menos um caso (sugestão: CT-VENDA-01) no TestLink.

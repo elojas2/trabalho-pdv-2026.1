@@ -42,6 +42,8 @@ Google Docs, está em **[`docs/README.md`](docs/README.md)**.
 | Índice geral da documentação | [`docs/README.md`](docs/README.md) |
 | Plano de Teste | [`docs/plano-de-teste.md`](docs/plano-de-teste.md) |
 | Relatórios (cobertura, mutação, inspeção) | [`docs/relatorios/`](docs/relatorios/) |
+| Relatório de testes manuais — VendaService | [`docs/relatorios/relatorio-testes-manuais-vendaservice.md`](docs/relatorios/relatorio-testes-manuais-vendaservice.md) |
+| Fichas de defeitos | [`docs/defeitos/`](docs/defeitos/) |
 | **Registro de uso de IA** | [`docs/ai/AI-LOG.md`](docs/ai/AI-LOG.md) |
 | Testes gerados por IA — solução inicial (v0) | [`docs/ai/transcricoes/AI-002-v0-CaixaServiceTest.java`](docs/ai/transcricoes/AI-002-v0-CaixaServiceTest.java) |
 | Testes gerados por IA — descrição das alterações da revisão | [`docs/ai/transcricoes/AI-003-alteracoes-v0-para-final.md`](docs/ai/transcricoes/AI-003-alteracoes-v0-para-final.md) |
