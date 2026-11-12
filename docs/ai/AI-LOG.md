@@ -240,3 +240,35 @@ Para testes gerados ou melhorados com auxílio de IA, preserve também:
 | **Decisão** | **Aceito:** plugin genérico no `pom.xml` (arquivo compartilhado pelo grupo). **Sobreviventes:** os 2 mutantes restantes removem `System.out.println` de depuração em `cadastro` (linhas 73–74) e foram classificados como **equivalentes** — não se escreveu teste para capturar a saída do console; as linhas serão removidas na etapa do SonarQube. «completar com a análise da integrante» |
 | **Validação** | Execução real com JDK 8 (`mvn test-compile org.pitest:pitest-maven:mutationCoverage -DtargetClasses=net.originmobi.pdv.service.CaixaService -DtargetTests=net.originmobi.pdv.CaixaServiceTest`): **54 mutantes gerados, 52 mortos — escore 96%**, cobertura de linhas 80/80, 0 mutantes sem cobertura, `BUILD SUCCESS`. |
 | **Transcrição** | Não preservada. |
+
+---
+
+## AI-014 — Entrega 2: teste estrutural (≥80% todas-arestas) e de mutação (≥80% PIT) de `VendaService`
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-11-09 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 2 — item 6: técnicas funcional, estrutural (≥80% todas-arestas, JaCoCo) e baseada em defeitos (≥80% de escore de mutação, PIT) aplicadas a `VendaService`, sem corrigir defeitos |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local; execução de testes via container Docker) |
+| **Prompt/instrução** | Sequência do integrante: (1) planejar o item 6 para `VendaService`, lembrando de jamais corrigir os defeitos (a disciplina é sobre teste), de usar Docker e de manter AI-LOG e README; (2) adotar a "opção A" para o conflito entre testes que falham e a exigência de suíte verde do PIT; (3) reforçar a suíte até as metas; (4) gerar o AI-LOG antes do relatório de mutação. |
+| **Resultado** | A IA: (a) mediu o baseline no container (JaCoCo 89,5% todas-arestas; PIT abortando por 2 testes vermelhos); (b) confirmou empiricamente que o PIT **aborta** com "Mutation testing requires a green suite"; (c) marcou os 2 testes de defeito com `@Tag("defeito")` e configurou `<excludedGroups>` no `pom.xml`, elevando o baseline de mutação medível a 65%; (d) analisou os 23 mutantes sobreviventes via `mutations.xml` e adicionou 9 testes com `ArgumentCaptor`, elevando o escore a **91%** (60/66) e cobrindo o método `lista` (métodos 11/11); (e) classificou os 6 mutantes restantes como equivalentes/sem efeito observável. |
+| **Decisão** | **Aceito:** a estratégia `@Tag("defeito")` + exclusão no PIT (não corrige defeito, não remove os testes de defeito, preserva a filosofia da matéria); os 9 testes de mutação com asserção por valor capturado. **Decisão consciente do integrante:** as asserções dos novos testes refletem o **comportamento atual** do código (inclusive o defeito DEF-VENDA-003 de troca desconto/acréscimo), pois teste de mutação precisa passar na suíte original; a denúncia do defeito permanece nos testes `@Tag("defeito")`. **Rejeitado:** forçar a morte dos 6 mutantes equivalentes com testes artificiais (ex.: capturar `System.out`) — documentados como equivalentes, a exemplo do relatório de `CaixaService`. |
+| **Validação** | Execução real no container `maven:3.8.8-eclipse-temurin-8` (JDK 8): `mvn -Dtest=VendaServiceTest test` → 43 testes, 2 falhas (apenas os `@Tag("defeito")`); JaCoCo **todas-arestas 34/38 = 89,5%** (≥80% OK), instruções 90,1%, métodos 11/11; PIT **66 mutações, 60 mortas = 91%** (≥80% OK), test strength 95%. O `mvn test` normal continua exibindo os 2 testes de defeito (a tag não os esconde da suíte comum nem do JaCoCo). |
+| **Transcrição** | Solução inicial (v0, 34 casos) em [`transcricoes/AI-014-v0-VendaServiceTest.java`](transcricoes/AI-014-v0-VendaServiceTest.java); solução final (43 casos) em [`transcricoes/AI-014-final-VendaServiceTest.java`](transcricoes/AI-014-final-VendaServiceTest.java) (cópia de `src/test/java/net/originmobi/pdv/VendaServiceTest.java`); descrição das alterações em [`transcricoes/AI-014-alteracoes-v0-para-final-VendaService.md`](transcricoes/AI-014-alteracoes-v0-para-final-VendaService.md). |
+
+---
+
+## AI-015 — Entrega 2: testes de integração de `VendaService` (banco real + triggers)
+
+| Campo | Conteúdo |
+| --- | --- |
+| **Data** | 2026-11-12 |
+| **Responsável** | Alexandre Porto |
+| **Atividade** | Entrega 2 — implementação de casos de teste de integração do `VendaService`, exercitando serviço + repositórios JPA + banco MySQL real (com migrações Flyway e triggers) |
+| **Ferramenta** | Kiro CLI (Claude Sonnet 4.6 — agente com acesso de leitura e escrita ao repositório local; execução via container Docker) |
+| **Prompt/instrução** | Instruções do integrante: implementar os testes de integração da sua classe (`VendaService`) pelo "Caminho A" (MySQL real via Docker, para exercitar os triggers), com 4 testes; sem corrigir defeitos; mantendo AI-LOG e README. |
+| **Resultado** | A IA criou `src/test/java/net/originmobi/pdv/VendaServiceIT.java` com 4 testes de integração anotados `@SpringBootTest` + `@Transactional` (rollback): (1) `abreVenda` persiste a venda no banco como ABERTA, com código gerado e usuário vinculado; (2) `abreVenda` em venda existente atualiza a observação via `updateDadosVenda`; (3) `busca`/`qtdAbertos` refletem o estado real do banco; (4) `addProduto` dispara o trigger `tr_atualizaTotalProdutosVenda`, confirmando que o `valor_produtos` é atualizado pelo próprio banco. O usuário autenticado é preparado populando o `SecurityContextHolder` com "gerente" no `@BeforeEach` (o singleton `Aplicacao` lê o usuário de lá; o projeto não tem `spring-security-test`). |
+| **Decisão** | **Aceito:** o uso do banco real (Caminho A), pois os triggers são parte essencial da lógica e um banco em memória (H2) não os reproduziria; `@Transactional` para rollback automático; autenticação manual via `SecurityContextHolder`. **Diagnóstico e correção de configuração (não de defeito):** descobriu-se que `@SpringBootTest` no Spring Boot 2.0.2 com JUnit 5 adicionado manualmente **não ativa** o `SpringExtension` automaticamente — sem `@ExtendWith(SpringExtension.class)` explícito o contexto não sobe e os `@Autowired` ficam nulos (NPE). Foi adicionada a anotação explícita. Observou-se que o `PdvApplicationTests` preexistente sofre do mesmo problema (passa em ~0,03s sem subir contexto), ou seja, nunca integrou nada. **Nenhum defeito do código de produção foi corrigido.** |
+| **Validação** | Execução real no container `maven:3.8.8-eclipse-temurin-8` contra o MySQL `pdv-db`: o log mostra o HikariPool conectando, o Flyway aplicando as migrações e `Started VendaServiceIT`. Resultado do surefire: **Tests run: 4, Failures: 0, Errors: 0, Skipped: 0** (7,656 s). Comando: `mvn -Dtest=VendaServiceIT test` dentro do container, com `docker compose up -d` previamente. |
+| **Transcrição** | Não preservada (o código final está em `src/test/java/net/originmobi/pdv/VendaServiceIT.java`). |
